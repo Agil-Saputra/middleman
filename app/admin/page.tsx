@@ -7,6 +7,10 @@ import { createSupabaseServerClient } from "@/app/lib/supabase-server";
 import { supabase } from "@/app/lib/supabase";
 import { AdminWithdrawal } from "@/app/lib/types";
 
+type AdminWithdrawalRow = Omit<AdminWithdrawal, "user"> & {
+  user: AdminWithdrawal["user"][] | AdminWithdrawal["user"] | null;
+};
+
 export default async function AdminPage() {
   const supabaseAuth = await createSupabaseServerClient();
   const {
@@ -33,6 +37,21 @@ export default async function AdminPage() {
       "id, user_id, amount, bank_name, account_number, account_holder, status, admin_note, created_at, updated_at, user:users!user_id(id, name, email, wallet_balance, reputation_score)"
     )
     .order("created_at", { ascending: false });
+
+  const normalizedWithdrawals: AdminWithdrawal[] = ((withdrawals ?? []) as AdminWithdrawalRow[])
+    .flatMap((item) => {
+      const user = Array.isArray(item.user) ? item.user[0] : item.user;
+      if (!user) {
+        return [];
+      }
+
+      return [
+        {
+          ...item,
+          user,
+        },
+      ];
+    });
 
   const displayName = dbUser.name || user.user_metadata?.name || user.email;
   const initials = displayName
@@ -89,7 +108,7 @@ export default async function AdminPage() {
         </div>
 
         <AdminWithdrawalDashboard
-          initialWithdrawals={(withdrawals ?? []) as AdminWithdrawal[]}
+          initialWithdrawals={normalizedWithdrawals}
         />
       </main>
     </div>

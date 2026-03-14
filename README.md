@@ -30,7 +30,7 @@ Dana pembeli ditahan terlebih dahulu, lalu diteruskan ke penjual saat transaksi 
 
 ## Kredensial Demo (User & Admin)
 
-Gunakan kredensial berikut agar reviewer bisa mencoba semua role.
+Gunakan kredensial berikut agar bisa mencoba semua role.
 
 ### A. Akun User (Buyer)
 
@@ -39,8 +39,8 @@ Gunakan kredensial berikut agar reviewer bisa mencoba semua role.
 
 ### B. Akun User (Seller)
 
-- Email: `seller@test.com`
-- Password: `Middleman123!`
+- Email: `ragelyusuf752@gmail.com`
+- Password: `123456`
 
 ### C. Akun Admin
 
@@ -79,5 +79,4 @@ Gunakan kredensial berikut agar reviewer bisa mencoba semua role.
 ## Notes untuk Reviewer
 
 - Jika setelah selesai pembayaran namun status transaksi belum terupdate, gunakan tombol/flow pengecekan manual payment (`check-payment`) di halaman detail transaksi.
-- Untuk simulasi `auto-release`, panggil endpoint:
 

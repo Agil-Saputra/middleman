@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { FEE_PERCENTAGE } from "@/app/lib/types";
 
 interface CreateTransactionFormProps {
@@ -23,6 +24,7 @@ export default function CreateTransactionForm({
     sellerId,
     onSuccess,
 }: CreateTransactionFormProps) {
+    const router = useRouter();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
@@ -31,6 +33,7 @@ export default function CreateTransactionForm({
     const [errorMessage, setErrorMessage] = useState("");
     const [paymentLink, setPaymentLink] = useState<string | null>(null);
     const [warningMessage, setWarningMessage] = useState("");
+    const [copyState, setCopyState] = useState<"idle" | "success" | "error">("idle");
 
     const numericPrice = parseFloat(price) || 0;
     const fee = numericPrice * FEE_PERCENTAGE;
@@ -81,6 +84,7 @@ export default function CreateTransactionForm({
                 }
 
                 onSuccess?.();
+                router.refresh();
             } catch (err) {
                 setStatus("error");
                 setErrorMessage(
@@ -89,10 +93,25 @@ export default function CreateTransactionForm({
                 setTimeout(() => setStatus("idle"), 4000);
             }
         },
-        [title, description, numericPrice, buyerEmail, sellerId, onSuccess]
+        [title, description, numericPrice, buyerEmail, sellerId, onSuccess, router]
     );
 
     const isDisabled = status === "loading" || !title.trim() || !numericPrice || !buyerEmail.trim();
+
+    const handleCopyPaymentLink = useCallback(async () => {
+        if (!paymentLink) return;
+
+        try {
+            await navigator.clipboard.writeText(paymentLink);
+            setCopyState("success");
+        } catch {
+            setCopyState("error");
+        }
+
+        setTimeout(() => {
+            setCopyState("idle");
+        }, 2000);
+    }, [paymentLink]);
 
     return (
         <div className="glass-card p-6 animate-fade-in-up">
@@ -186,7 +205,7 @@ export default function CreateTransactionForm({
 
                 {/* Fee Breakdown */}
                 {numericPrice > 0 && (
-                    <div className="rounded-xl border border-card-border bg-white/[0.02] p-4 space-y-2">
+                    <div className="rounded-xl border border-card-border bg-white/2 p-4 space-y-2">
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Harga</span>
                             <span className="text-foreground font-medium">
@@ -247,7 +266,7 @@ export default function CreateTransactionForm({
                     )}
                     <span className={status === "loading" ? "invisible" : ""}>
                         {status === "success"
-                            ? "✓ Transaksi Berhasil Dibuat!"
+                            ? "Transaksi Berhasil Dibuat!"
                             : "Buat Transaksi"}
                     </span>
                 </button>
@@ -276,22 +295,22 @@ export default function CreateTransactionForm({
                 {paymentLink && status === "success" && (
                     <div className="rounded-xl border border-status-completed/20 bg-status-completed-bg p-4 animate-fade-in-up">
                         <p className="mb-3 text-sm font-medium text-status-completed">
-                            ✓ Transaksi berhasil! Kirim link berikut ke pembeli:
+                            Transaksi berhasil! Kirim link berikut ke pembeli:
                         </p>
-                        <div className="mb-3 rounded-lg bg-white/[0.05] p-2.5 text-xs text-muted-foreground break-all font-mono">
+                        <div className="mb-3 rounded-lg bg-white/5 p-2.5 text-xs text-muted-foreground break-all font-mono">
                             {paymentLink}
                         </div>
-                        <a
-                            href={paymentLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-status-completed py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110"
+                        <button
+                            type="button"
+                            onClick={handleCopyPaymentLink}
+                            className="w-full rounded-lg border border-card-border bg-white/3 py-2.5 text-sm font-semibold text-foreground transition-all hover:border-primary-blue/30 hover:text-primary-blue active:scale-[0.98]"
                         >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                            </svg>
-                            Buka Halaman Pembayaran
-                        </a>
+                            {copyState === "success"
+                                ? "✓ Link berhasil disalin"
+                                : copyState === "error"
+                                    ? "Gagal menyalin, coba lagi"
+                                    : "Copy Link Pembayaran"}
+                        </button>
                     </div>
                 )}
 
