@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Routes that don't require authentication
-const PUBLIC_ROUTES = ["/auth/signin", "/auth/signup", "/auth/callback"];
+const PUBLIC_ROUTES = ["/", "/auth/signin", "/auth/signup", "/auth/callback"];
 
 // Routes that should bypass middleware entirely (API webhooks, etc.)
 const BYPASS_ROUTES = ["/api/webhook"];
@@ -49,6 +49,9 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  const isAuthRoute = ["/auth/signin", "/auth/signup", "/auth/callback"].some(
+    (route) => pathname.startsWith(route)
+  );
 
   // Not authenticated and trying to access a protected route → redirect to sign in
   if (!user && !isPublicRoute) {
@@ -58,9 +61,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated and trying to access auth pages → redirect to dashboard
-  if (user && isPublicRoute) {
+  if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
-import { FEE_PERCENTAGE } from "@/app/lib/types";
+import { FEE_PERCENTAGE, SELLER_DEADLINE_MS } from "@/app/lib/types";
 
 // ─── Mayar.id Configuration ──────────────────────────────────────────────────
 const MAYAR_API_URL = "https://api.mayar.club/hl/v1/payment/create";
@@ -36,7 +36,7 @@ async function createMayarPaymentLink(params: {
             amount: params.amount,
             email: params.email,
             mobile: "0000000000", // placeholder — Mayar requires this field
-            redirectURL: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/transactions/success`,
+            redirectURL: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
             description: params.description,
             expiredAt,
         }),
@@ -94,7 +94,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { title, price, buyer_email, seller_id } = body;
+        const { title, description, price, buyer_email, seller_id } = body;
 
         // ── Validation ──────────────────────────────────────────────────────────
         if (!title || typeof title !== "string" || !title.trim()) {
@@ -178,12 +178,14 @@ export async function POST(req: NextRequest) {
             .from("transactions")
             .insert({
                 title: title.trim(),
+                description: description?.trim() || null,
                 price,
                 fee,
                 total_amount,
                 status: "PENDING",
                 buyer_id: buyer.id,
                 seller_id: seller.id,
+                deadline_time: new Date(Date.now() + SELLER_DEADLINE_MS).toISOString(),
             })
             .select(
                 "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"

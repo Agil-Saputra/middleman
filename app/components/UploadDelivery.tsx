@@ -15,6 +15,7 @@ export default function UploadDelivery({
 }: UploadDeliveryProps) {
     const [fileUrl, setFileUrl] = useState("");
     const [textProof, setTextProof] = useState("");
+    const [screenRecordUrl, setScreenRecordUrl] = useState("");
     const [status, setStatus] = useState<FormStatus>("idle");
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -33,6 +34,7 @@ export default function UploadDelivery({
                         body: JSON.stringify({
                             file_url: fileUrl.trim(),
                             text_proof: textProof.trim(),
+                            screen_record_url: screenRecordUrl.trim() || undefined,
                         }),
                     }
                 );
@@ -52,7 +54,7 @@ export default function UploadDelivery({
                 setTimeout(() => setStatus("idle"), 4000);
             }
         },
-        [transactionId, fileUrl, textProof, onSuccess]
+        [transactionId, fileUrl, textProof, screenRecordUrl, onSuccess]
     );
 
     const isDisabled = status === "loading" || !fileUrl.trim();
@@ -79,7 +81,7 @@ export default function UploadDelivery({
                     <h3 className="mb-1 text-base font-semibold text-foreground">
                         Aset Berhasil Dikirim!
                     </h3>
-                    <p className="text-sm text-muted max-w-xs">
+                    <p className="text-sm text-muted-foreground max-w-xs">
                         Pembeli akan menerima notifikasi. Status transaksi telah diubah
                         menjadi <span className="font-semibold text-status-delivered">DELIVERED</span>.
                     </p>
@@ -92,9 +94,9 @@ export default function UploadDelivery({
         <div className="glass-card p-6 animate-fade-in-up">
             <div className="mb-5">
                 <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-blue/15">
                         <svg
-                            className="h-4 w-4 text-accent"
+                            className="h-4 w-4 text-primary-blue"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={2}
@@ -111,7 +113,7 @@ export default function UploadDelivery({
                         Kirim Aset Digital
                     </h3>
                 </div>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                     Pembayaran sudah dikonfirmasi. Kirimkan file hasil kerja ke pembeli.
                 </p>
             </div>
@@ -121,7 +123,7 @@ export default function UploadDelivery({
                 <div>
                     <label
                         htmlFor="delivery-file-url"
-                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Link File (Google Drive / Dropbox / dll)
                     </label>
@@ -131,10 +133,10 @@ export default function UploadDelivery({
                         value={fileUrl}
                         onChange={(e) => setFileUrl(e.target.value)}
                         placeholder="https://drive.google.com/file/d/..."
-                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                         required
                     />
-                    <p className="mt-1 text-[11px] text-muted">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                         Pastikan link bisa diakses oleh pembeli
                     </p>
                 </div>
@@ -143,10 +145,10 @@ export default function UploadDelivery({
                 <div>
                     <label
                         htmlFor="delivery-text-proof"
-                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Catatan Pengiriman{" "}
-                        <span className="normal-case text-muted/60">(opsional)</span>
+                        <span className="normal-case text-muted-foreground/60">(opsional)</span>
                     </label>
                     <textarea
                         id="delivery-text-proof"
@@ -154,8 +156,30 @@ export default function UploadDelivery({
                         onChange={(e) => setTextProof(e.target.value)}
                         placeholder="Deskripsi file, instruksi penggunaan, catatan tambahan..."
                         rows={3}
-                        className="w-full resize-none rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                        className="w-full resize-none rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                     />
+                </div>
+
+                {/* Screen Recording URL */}
+                <div>
+                    <label
+                        htmlFor="delivery-screen-record"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >
+                        Link Screen Recording{" "}
+                        <span className="normal-case text-muted-foreground/60">(sangat disarankan)</span>
+                    </label>
+                    <input
+                        id="delivery-screen-record"
+                        type="url"
+                        value={screenRecordUrl}
+                        onChange={(e) => setScreenRecordUrl(e.target.value)}
+                        placeholder="https://youtube.com/watch?v=... atau link cloud storage"
+                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                    />
+                    <p className="mt-1 text-[11px] text-status-pending">
+                        ⚠ Rekam proses penyerahan aset sebagai bukti jika terjadi sengketa
+                    </p>
                 </div>
 
                 {/* Submit */}
@@ -165,8 +189,8 @@ export default function UploadDelivery({
                     className={`
             relative w-full rounded-xl py-3.5 text-sm font-semibold transition-all duration-300
             ${status === "loading"
-                            ? "cursor-wait bg-accent/50 text-white/70"
-                            : "bg-accent text-white hover:bg-accent-hover hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                            ? "cursor-wait bg-primary-blue/50 text-white/70"
+                            : "bg-primary-blue text-white hover:bg-accent-hover hover:shadow-lg hover:shadow-primary-blue/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                         }
           `}
                 >

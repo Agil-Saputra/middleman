@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
+import { AUTO_RELEASE_MS } from "@/app/lib/types";
 
 // POST /api/transactions/[id]/deliver — seller submits delivery proof
 export async function POST(
@@ -9,7 +10,7 @@ export async function POST(
     try {
         const { id } = await params;
         const body = await req.json();
-        const { file_url, text_proof } = body;
+        const { file_url, text_proof, screen_record_url } = body;
 
         // ── Validation ──────────────────────────────────────────────────────────
         if (!file_url || typeof file_url !== "string" || !file_url.trim()) {
@@ -45,11 +46,11 @@ export async function POST(
             );
         }
 
-        // Only allow delivery if status is PAID
-        if (transaction.status !== "PAID") {
+        // Only allow delivery if status is SECURED
+        if (transaction.status !== "SECURED") {
             return NextResponse.json(
                 {
-                    error: `Pengiriman hanya bisa dilakukan pada transaksi berstatus PAID. Status saat ini: ${transaction.status}`,
+                    error: `Pengiriman hanya bisa dilakukan pada transaksi berstatus SECURED (Dana Diamankan). Status saat ini: ${transaction.status}`,
                 },
                 { status: 400 }
             );
@@ -68,6 +69,7 @@ export async function POST(
                 transaction_id: id,
                 file_url: file_url.trim(),
                 text_proof: text_proof?.trim() || null,
+                screen_record_url: screen_record_url?.trim() || null,
             })
             .select()
             .single();
@@ -80,10 +82,11 @@ export async function POST(
             );
         }
 
-        // ── Update Transaction status to DELIVERED ──────────────────────────────
+        // ── Update Transaction status to DELIVERED + set auto_release_at ──────
+        const autoReleaseAt = new Date(Date.now() + AUTO_RELEASE_MS).toISOString();
         const { data: updatedTransaction, error: updateError } = await supabase
             .from("transactions")
-            .update({ status: "DELIVERED" })
+            .update({ status: "DELIVERED", auto_release_at: autoReleaseAt })
             .eq("id", id)
             .select(
                 "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email), delivery_logs(*)  "

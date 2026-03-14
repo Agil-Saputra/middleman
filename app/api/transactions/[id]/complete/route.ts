@@ -92,6 +92,30 @@ export async function POST(
             }
         }
 
+        // ── Increment reputation score for both parties ───────────────────
+        const { data: sellerUser } = await supabase
+            .from("users")
+            .select("reputation_score")
+            .eq("id", transaction.seller_id)
+            .single();
+        if (sellerUser) {
+            await supabase
+                .from("users")
+                .update({ reputation_score: (sellerUser.reputation_score || 0) + 1 })
+                .eq("id", transaction.seller_id);
+        }
+        const { data: buyerUser } = await supabase
+            .from("users")
+            .select("reputation_score")
+            .eq("id", transaction.buyer_id)
+            .single();
+        if (buyerUser) {
+            await supabase
+                .from("users")
+                .update({ reputation_score: (buyerUser.reputation_score || 0) + 1 })
+                .eq("id", transaction.buyer_id);
+        }
+
         console.log(
             `[Complete] Transaction ${id} completed. Seller ${transaction.seller_id} credited ${sellerPayout}`
         );

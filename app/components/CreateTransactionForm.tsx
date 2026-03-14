@@ -24,6 +24,7 @@ export default function CreateTransactionForm({
     onSuccess,
 }: CreateTransactionFormProps) {
     const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [buyerEmail, setBuyerEmail] = useState("");
     const [status, setStatus] = useState<FormStatus>("idle");
@@ -49,6 +50,7 @@ export default function CreateTransactionForm({
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         title: title.trim(),
+                        description: description.trim(),
                         price: numericPrice,
                         buyer_email: buyerEmail.trim(),
                         seller_id: sellerId || "demo-seller",
@@ -64,6 +66,7 @@ export default function CreateTransactionForm({
 
                 setStatus("success");
                 setTitle("");
+                setDescription("");
                 setPrice("");
                 setBuyerEmail("");
 
@@ -86,7 +89,7 @@ export default function CreateTransactionForm({
                 setTimeout(() => setStatus("idle"), 4000);
             }
         },
-        [title, numericPrice, buyerEmail, sellerId, onSuccess]
+        [title, description, numericPrice, buyerEmail, sellerId, onSuccess]
     );
 
     const isDisabled = status === "loading" || !title.trim() || !numericPrice || !buyerEmail.trim();
@@ -97,7 +100,7 @@ export default function CreateTransactionForm({
                 <h2 className="text-lg font-semibold text-foreground">
                     Buat Transaksi Baru
                 </h2>
-                <p className="mt-1 text-sm text-muted">
+                <p className="mt-1 text-sm text-muted-foreground">
                     Isi detail transaksi di bawah. Fee platform sebesar 5% akan
                     ditambahkan otomatis.
                 </p>
@@ -108,7 +111,7 @@ export default function CreateTransactionForm({
                 <div>
                     <label
                         htmlFor="tx-title"
-                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Judul Transaksi
                     </label>
@@ -118,8 +121,26 @@ export default function CreateTransactionForm({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Contoh: Desain Logo Brand"
-                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                         required
+                    />
+                </div>
+
+                {/* Deskripsi */}
+                <div>
+                    <label
+                        htmlFor="tx-description"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >
+                        Deskripsi <span className="normal-case text-muted-foreground/60">(opsional)</span>
+                    </label>
+                    <textarea
+                        id="tx-description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Jelaskan detail jasa/aset yang ditawarkan..."
+                        rows={3}
+                        className="w-full resize-none rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                     />
                 </div>
 
@@ -127,7 +148,7 @@ export default function CreateTransactionForm({
                 <div>
                     <label
                         htmlFor="tx-price"
-                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Harga (IDR)
                     </label>
@@ -139,7 +160,7 @@ export default function CreateTransactionForm({
                         placeholder="150000"
                         min="1000"
                         step="1000"
-                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                         required
                     />
                 </div>
@@ -148,7 +169,7 @@ export default function CreateTransactionForm({
                 <div>
                     <label
                         htmlFor="tx-buyer-email"
-                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Email Pembeli
                     </label>
@@ -158,7 +179,7 @@ export default function CreateTransactionForm({
                         value={buyerEmail}
                         onChange={(e) => setBuyerEmail(e.target.value)}
                         placeholder="pembeli@email.com"
-                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                        className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                         required
                     />
                 </div>
@@ -167,20 +188,20 @@ export default function CreateTransactionForm({
                 {numericPrice > 0 && (
                     <div className="rounded-xl border border-card-border bg-white/[0.02] p-4 space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted">Harga</span>
+                            <span className="text-muted-foreground">Harga</span>
                             <span className="text-foreground font-medium">
                                 {formatCurrency(numericPrice)}
                             </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted">Fee Platform (5%)</span>
+                            <span className="text-muted-foreground">Fee Platform (5%)</span>
                             <span className="text-status-pending font-medium">
                                 {formatCurrency(fee)}
                             </span>
                         </div>
                         <div className="border-t border-card-border pt-2 flex items-center justify-between text-sm">
                             <span className="font-semibold text-foreground">Total</span>
-                            <span className="font-bold text-accent text-base">
+                            <span className="font-bold text-primary-blue text-base">
                                 {formatCurrency(totalAmount)}
                             </span>
                         </div>
@@ -194,10 +215,10 @@ export default function CreateTransactionForm({
                     className={`
             relative w-full rounded-xl py-3.5 text-sm font-semibold transition-all duration-300
             ${status === "loading"
-                            ? "cursor-wait bg-accent/50 text-white/70"
+                            ? "cursor-wait bg-primary-blue/50 text-white/70"
                             : status === "success"
                                 ? "bg-success text-white"
-                                : "bg-accent text-white hover:bg-accent-hover hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                                : "bg-primary-blue text-white hover:bg-accent-hover hover:shadow-lg hover:shadow-primary-blue/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                         }
           `}
                 >
@@ -257,7 +278,7 @@ export default function CreateTransactionForm({
                         <p className="mb-3 text-sm font-medium text-status-completed">
                             ✓ Transaksi berhasil! Kirim link berikut ke pembeli:
                         </p>
-                        <div className="mb-3 rounded-lg bg-white/[0.05] p-2.5 text-xs text-muted break-all font-mono">
+                        <div className="mb-3 rounded-lg bg-white/[0.05] p-2.5 text-xs text-muted-foreground break-all font-mono">
                             {paymentLink}
                         </div>
                         <a

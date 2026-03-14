@@ -1,5 +1,6 @@
 import { supabase } from "@/app/lib/supabase";
-import { notFound } from "next/navigation";
+import { createSupabaseServerClient } from "@/app/lib/supabase-server";
+import { notFound, redirect } from "next/navigation";
 import TransactionDetail from "./TransactionDetail";
 
 interface TransactionPageProps {
@@ -24,6 +25,20 @@ export async function generateMetadata({ params }: TransactionPageProps) {
 export default async function TransactionPage({ params }: TransactionPageProps) {
     const { id } = await params;
 
+    // Get authenticated user
+    const supabaseAuth = await createSupabaseServerClient();
+    const { data: { user } } = await supabaseAuth.auth.getUser();
+    if (!user) redirect("/auth/signin");
+
+    // Look up user's DB id
+    const { data: dbUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", user.email!)
+        .single();
+
+    const currentUserId = dbUser?.id || user.id;
+
     const { data: transaction, error } = await supabase
         .from("transactions")
         .select(
@@ -36,20 +51,12 @@ export default async function TransactionPage({ params }: TransactionPageProps) 
         notFound();
     }
 
-    // Sort delivery_logs descending by created_at (client-side since Supabase
-    // doesn't support ordering embedded relations in the select shorthand)
     if (transaction.delivery_logs) {
         transaction.delivery_logs.sort(
             (a: { created_at: string }, b: { created_at: string }) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
     }
-
-    // Supabase returns ISO strings by default — no need for manual serialization.
-    // The `transaction` object is already JSON-serializable.
-
-    // TODO: Replace with actual authenticated user ID
-    const currentUserId = transaction.seller.id;
 
     return <TransactionDetail transaction={transaction} currentUserId={currentUserId} />;
 }

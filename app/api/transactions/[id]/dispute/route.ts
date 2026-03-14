@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
 
-// POST /api/transactions/[id]/dispute — buyer raises a dispute
+// POST /api/transactions/[id]/dispute — buyer raises a dispute with evidence
 export async function POST(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -9,7 +9,14 @@ export async function POST(
     try {
         const { id } = await params;
         const body = await req.json();
-        const { reason } = body;
+        const { reason, evidence_url } = body;
+
+        if (!reason || typeof reason !== "string" || !reason.trim()) {
+            return NextResponse.json(
+                { error: "Alasan sengketa wajib diisi" },
+                { status: 400 }
+            );
+        }
 
         // ── Find transaction ────────────────────────────────────────────────────
         const { data: transaction, error: findError } = await supabase
@@ -35,15 +42,13 @@ export async function POST(
             );
         }
 
-        // TODO: Verify that the requesting user is the buyer
-        // if (currentUserId !== transaction.buyer_id) {
-        //   return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-        // }
-
-        // Update transaction status to DISPUTED
+        // Update transaction status to DISPUTED and store the reason
         const { data: updatedTransaction, error: updateError } = await supabase
             .from("transactions")
-            .update({ status: "DISPUTED" })
+            .update({
+                status: "DISPUTED",
+                dispute_reason: reason.trim(),
+            })
             .eq("id", id)
             .select(
                 "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"
@@ -58,19 +63,54 @@ export async function POST(
             );
         }
 
-        console.log(
-            `[Dispute] Transaction ${id} disputed. Reason: ${reason || "Not provided"}`
+        // Save buyer's evidence
+        if (evidence_url) {
+            await supabase.from("dispute_evidence").insert({
+                transaction_id: id,
+                submitted_by: transaction.buyer_id,
+                evidence_type: "buyer",
+                file_url: evidence_url.trim(),
+                description: reason.trim(),
+            });
+        }
+
+        // Refund: return funds to buyer (credit buyer wallet)
+        const refundAmount = transaction.total_amount;
+        const { error: walletError } = await supabase.rpc(
+            "increment_wallet_balance",
+            { user_id: transaction.buyer_id, amount: refundAmount }
         );
 
-        // TODO: Send notification emails to both buyer and seller
-        // TODO: Create a dispute record in a Dispute table for admin review
-        // TODO: Notify admin/support team for manual resolution
+        if (walletError) {
+            console.warn("RPC increment_wallet_balance not found, using manual update:", walletError.message);
+            const { data: buyerData } = await supabase
+                .from("users")
+                .select("wallet_balance")
+                .eq("id", transaction.buyer_id)
+                .single();
+            if (buyerData) {
+                await supabase
+                    .from("users")
+                    .update({ wallet_balance: (buyerData.wallet_balance || 0) + refundAmount })
+                    .eq("id", transaction.buyer_id);
+            }
+        }
+
+        // Update status to REFUNDED after crediting
+        await supabase
+            .from("transactions")
+            .update({ status: "REFUNDED" })
+            .eq("id", id);
+
+        console.log(
+            `[Dispute] Transaction ${id} disputed & refunded. Reason: ${reason}. Refund: ${refundAmount}`
+        );
 
         return NextResponse.json(
             {
-                message:
-                    "Dispute berhasil diajukan. Tim Middleman akan meninjau kasus ini.",
+                message: "Sengketa berhasil diajukan. Dana telah dikembalikan ke wallet pembeli.",
                 transaction: updatedTransaction,
+                refund_amount: refundAmount,
             },
             { status: 200 }
         );

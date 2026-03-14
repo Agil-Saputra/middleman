@@ -11,11 +11,9 @@ interface DashboardViewProps {
 function StatusBadge({ status }: { status: TransactionStatus }) {
     const config = STATUS_CONFIG[status];
     return (
-        <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${config.bgClass} ${config.textClass}`}
-        >
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${config.bgClass} ${config.textClass}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${config.dotClass}`} />
-            {config.label}
+            {config.labelId}
         </span>
     );
 }
@@ -47,9 +45,9 @@ export default function DashboardView({
         return (
             <div className="glass-card flex flex-col items-center justify-center p-12 text-center animate-fade-in-up">
                 {/* Empty state icon */}
-                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/10">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-blue/10">
                     <svg
-                        className="h-10 w-10 text-accent"
+                        className="h-10 w-10 text-primary-blue"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
@@ -65,7 +63,7 @@ export default function DashboardView({
                 <h3 className="mb-2 text-lg font-semibold text-foreground">
                     Belum Ada Transaksi
                 </h3>
-                <p className="max-w-sm text-sm text-muted">
+                <p className="max-w-sm text-sm text-muted-foreground">
                     Transaksi yang kamu buat atau terima akan muncul di sini. Mulai dengan
                     membuat transaksi baru.
                 </p>
@@ -89,10 +87,10 @@ export default function DashboardView({
                         {/* Header row: title + status */}
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
-                                <h3 className="truncate text-[15px] font-semibold text-foreground group-hover:text-accent-hover transition-colors">
+                                <h3 className="truncate text-[15px] font-semibold text-foreground group-hover:text-primary-blue transition-colors">
                                     {tx.title}
                                 </h3>
-                                <p className="mt-0.5 text-xs text-muted">
+                                <p className="mt-0.5 text-xs text-muted-foreground">
                                     {formatDate(tx.created_at)}
                                 </p>
                             </div>
@@ -103,7 +101,7 @@ export default function DashboardView({
                         <div className="grid grid-cols-2 gap-3">
                             {/* Price */}
                             <div className="rounded-xl bg-white/[0.03] px-3 py-2.5">
-                                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted">
+                                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                                     Harga
                                 </p>
                                 <p className="text-sm font-bold text-foreground">
@@ -112,10 +110,10 @@ export default function DashboardView({
                             </div>
                             {/* Total */}
                             <div className="rounded-xl bg-white/[0.03] px-3 py-2.5">
-                                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted">
+                                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                                     Total
                                 </p>
-                                <p className="text-sm font-bold text-accent">
+                                <p className="text-sm font-bold text-primary-blue">
                                     {formatCurrency(tx.total_amount)}
                                 </p>
                             </div>
@@ -124,19 +122,19 @@ export default function DashboardView({
                         {/* Footer: role + counterparty */}
                         <div className="mt-3 flex items-center justify-between border-t border-card-border pt-3">
                             <div className="flex items-center gap-2">
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-blue/15 text-xs font-bold text-primary-blue">
                                     {counterparty.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium text-foreground">
                                         {counterparty.name}
                                     </p>
-                                    <p className="text-[10px] text-muted">
+                                    <p className="text-[10px] text-muted-foreground">
                                         {counterparty.email}
                                     </p>
                                 </div>
                             </div>
-                            <span className="rounded-md bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                            <span className="rounded-md bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                                 {roleLabel}
                             </span>
                         </div>

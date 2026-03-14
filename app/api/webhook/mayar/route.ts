@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from "@/app/lib/supabase";
+import { SELLER_DEADLINE_MS } from "@/app/lib/types";
 
 // ─── Mayar Webhook Secret for Signature Verification ─────────────────────────
 const MAYAR_WEBHOOK_SECRET = process.env.MAYAR_WEBHOOK_SECRET || "";
@@ -15,6 +16,9 @@ interface MayarWebhookPayload {
         updatedAt: string;
         merchantId: string;
         merchantEmail: string;
+        paymentLinkId?: string;
+        paymentLink?: { id: string; [key: string]: unknown };
+        link?: string;
         [key: string]: unknown;
     };
 }
@@ -93,25 +97,73 @@ export async function POST(req: NextRequest) {
             payload.data.id
         );
 
-        // 4. Handle payment.received event
-        if (payload.event === "payment.received") {
-            const mayarTransactionId = payload.data.id;
+        // 4. Handle payment event (accept multiple event name variants)
+        const paymentEvents = ["payment.received", "payment.success", "payment.completed"];
+        if (paymentEvents.includes(payload.event)) {
+            // Extract all possible IDs from the webhook payload.
+            // Mayar's webhook data.id is often the payment-transaction ID,
+            // which differs from the payment-link ID we stored at creation time.
+            const possibleIds: string[] = [];
 
-            // Find the transaction in our DB by Mayar's transaction ID
-            const { data: transaction, error: findError } = await supabase
-                .from("transactions")
-                .select(
-                    "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"
-                )
-                .eq("mayar_transaction_id", mayarTransactionId)
-                .single();
+            // data.id — may match if Mayar returns consistent IDs
+            if (payload.data.id) possibleIds.push(payload.data.id);
+            // data.paymentLinkId — common field for the original link reference
+            if (payload.data.paymentLinkId) possibleIds.push(payload.data.paymentLinkId);
+            // data.paymentLink.id — nested variant
+            if (payload.data.paymentLink?.id) possibleIds.push(payload.data.paymentLink.id);
 
-            if (findError || !transaction) {
+            console.log("[Webhook] Trying to match with IDs:", possibleIds);
+
+            // Try to find the transaction using any of the possible IDs
+            let transaction = null;
+            let findError = null;
+
+            for (const candidateId of possibleIds) {
+                const { data, error } = await supabase
+                    .from("transactions")
+                    .select(
+                        "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"
+                    )
+                    .eq("mayar_transaction_id", candidateId)
+                    .single();
+
+                if (data && !error) {
+                    transaction = data;
+                    findError = null;
+                    console.log(`[Webhook] Matched transaction ${data.id} using ID: ${candidateId}`);
+                    break;
+                }
+                findError = error;
+            }
+
+            // Fallback: try matching by payment link URL if Mayar includes the link
+            if (!transaction && payload.data.link) {
+                const { data, error } = await supabase
+                    .from("transactions")
+                    .select(
+                        "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"
+                    )
+                    .eq("mayar_payment_link", payload.data.link)
+                    .single();
+
+                if (data && !error) {
+                    transaction = data;
+                    findError = null;
+                    console.log(`[Webhook] Matched transaction ${data.id} using payment link URL`);
+
+                    // Persist the webhook's transaction ID for future lookups
+                    await supabase
+                        .from("transactions")
+                        .update({ mayar_transaction_id: payload.data.id })
+                        .eq("id", data.id);
+                }
+            }
+
+            if (!transaction) {
                 console.error(
-                    `[Webhook] Transaction not found for Mayar ID: ${mayarTransactionId}`
+                    `[Webhook] Transaction not found for any Mayar ID. Tried:`, possibleIds,
+                    `Full payload:`, JSON.stringify(payload, null, 2)
                 );
-                // Return 200 to prevent Mayar from retrying — the transaction may
-                // have been deleted or was never created on our side
                 return NextResponse.json(
                     { error: "Transaction not found" },
                     { status: 200 }
@@ -129,11 +181,14 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            // Update transaction status to PAID
+            // Update transaction status to SECURED (dana diamankan)
             const { data: updatedTransaction, error: updateError } =
                 await supabase
                     .from("transactions")
-                    .update({ status: "PAID" })
+                    .update({
+                        status: "SECURED",
+                        deadline_time: new Date(Date.now() + SELLER_DEADLINE_MS).toISOString(),
+                    })
                     .eq("id", transaction.id)
                     .select(
                         "*, buyer:users!buyer_id(id, name, email), seller:users!seller_id(id, name, email)"
@@ -149,16 +204,16 @@ export async function POST(req: NextRequest) {
             }
 
             console.log(
-                `[Webhook] Transaction ${updatedTransaction!.id} updated to PAID`
+                `[Webhook] Transaction ${updatedTransaction!.id} updated to SECURED`
             );
 
             // TODO: Uncomment when email service is implemented
             // await notifySellerPaymentReceived(updatedTransaction);
 
             return NextResponse.json({
-                message: "Payment processed successfully",
+                message: "Payment processed — funds secured in escrow",
                 transaction_id: updatedTransaction!.id,
-                status: "PAID",
+                status: "SECURED",
             });
         }
 

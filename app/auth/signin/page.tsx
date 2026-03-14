@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/app/lib/supabase-browser";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
@@ -48,33 +49,22 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       {/* Decorative background elements */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary-blue/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary-blue/5 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md animate-fade-in-up">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent animate-pulse-glow">
-            <svg
-              className="h-6 w-6 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-              />
-            </svg>
-          </div>
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image src="/blue-logo.svg" alt="Logo" width={40} height={40} />
+            <span className="text-xl font-bold tracking-tight">Middleman</span>
+          </Link>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
               Selamat Datang
             </h1>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-muted-foreground">
               Masuk ke akun Middleman Anda
             </p>
           </div>
@@ -97,7 +87,7 @@ export default function SignInPage() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted">
+              <label htmlFor="email" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Email
               </label>
               <input
@@ -108,13 +98,13 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@email.com"
-                className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted">
+              <label htmlFor="password" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Password
               </label>
               <input
@@ -125,7 +115,7 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-muted/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
+                className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
               />
             </div>
 
@@ -133,7 +123,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full overflow-hidden rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-accent-hover hover:shadow-lg hover:shadow-accent/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full overflow-hidden rounded-xl bg-primary-blue px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-accent-hover hover:shadow-lg hover:shadow-primary-blue/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className={`flex items-center justify-center gap-2 transition-opacity ${loading ? 'opacity-0' : 'opacity-100'}`}>
                 Masuk
@@ -152,26 +142,22 @@ export default function SignInPage() {
           {/* Divider */}
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-card-border" />
-            <span className="text-[11px] font-medium uppercase tracking-widest text-muted">atau</span>
+            <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">atau</span>
             <div className="h-px flex-1 bg-card-border" />
           </div>
 
           {/* Sign Up Link */}
-          <p className="text-center text-sm text-muted">
+          <p className="text-center text-sm text-muted-foreground">
             Belum punya akun?{" "}
             <Link
               href="/auth/signup"
-              className="font-semibold text-accent transition-colors hover:text-accent-hover"
+              className="font-semibold text-primary-blue transition-colors hover:text-accent-hover"
             >
               Daftar sekarang
             </Link>
           </p>
         </div>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-[11px] text-muted/60">
-          Middleman — Rekening Bersama Otomatis
-        </p>
       </div>
     </div>
   );

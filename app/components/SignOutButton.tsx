@@ -20,7 +20,7 @@ export default function SignOutButton() {
     <button
       onClick={handleSignOut}
       disabled={loading}
-      className="flex items-center gap-1.5 rounded-lg border border-card-border bg-card px-3 py-1.5 text-xs font-medium text-muted transition-all duration-200 hover:border-danger/30 hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+      className="flex items-center gap-1.5 rounded-lg border border-card-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:border-danger/30 hover:bg-danger/10 hover:text-danger disabled:opacity-50"
       title="Keluar"
     >
       {loading ? (
