@@ -132,7 +132,8 @@ UPDATE transactions SET status = 'SECURED' WHERE status = 'PAID';
 INSERT INTO users (name, email, role, wallet_balance)
 VALUES
     ('Buyer Test', 'bukanagel@gmail.com', 'buyer', 0),
-    ('Seller Test', 'seller@test.com', 'seller', 0)
+    ('Seller Test', 'seller@test.com', 'seller', 0),
+    ('Admin Middleman', 'admin@middleman.id', 'admin', 0)
 ON CONFLICT (email) DO NOTHING;
         `);
         return false;
@@ -158,9 +159,13 @@ async function seed() {
     }
 
     // If tables were created via RPC, seed the data
+    const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@middleman.id";
+    const adminName = process.env.SEED_ADMIN_NAME || "Admin Middleman";
+
     const users = [
         { name: "Buyer Test", email: "bukanagel@gmail.com", role: "buyer", wallet_balance: 0 },
         { name: "Seller Test", email: "seller@test.com", role: "seller", wallet_balance: 0 },
+        { name: adminName, email: adminEmail, role: "admin", wallet_balance: 0 },
     ];
 
     for (const user of users) {
@@ -178,6 +183,7 @@ async function seed() {
     }
 
     console.log("\n🎉 Seeding complete!");
+    console.log(`🔐 Admin seeded: ${adminName} (${adminEmail})`);
 }
 
 seed().catch(console.error);

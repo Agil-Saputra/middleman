@@ -134,6 +134,10 @@ export interface Withdrawal {
     updated_at: string;
 }
 
+export interface AdminWithdrawal extends Withdrawal {
+    user: Pick<UserInfo, "id" | "name" | "email" | "wallet_balance" | "reputation_score">;
+}
+
 export const WITHDRAWAL_STATUS_CONFIG: Record<
     WithdrawalStatus,
     { labelId: string; dotClass: string; textClass: string; bgClass: string }

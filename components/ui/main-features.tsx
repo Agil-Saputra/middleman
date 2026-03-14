@@ -301,10 +301,12 @@ export default function WhyChooseUs() {
                         Pembeli
                       </span>
                       <div className="ring-background size-7 ring-4">
-                        <img
+                        <Image
                           className="size-full rounded-full"
                           src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=64&h=64&fit=crop&crop=face"
                           alt="Pembeli"
+						  width={100}
+						  height={100}
                         />
                       </div>
                     </div>
@@ -321,10 +323,12 @@ export default function WhyChooseUs() {
                         Penjual
                       </span>
                       <div className="ring-background size-7 ring-4">
-                        <img
+                        <Image
                           className="size-full rounded-full"
                           src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face"
                           alt="Middleman"
+						  width={100}
+						  height={100}
                         />
                       </div>
                     </div>

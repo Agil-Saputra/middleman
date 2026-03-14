@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 export interface Feature {
@@ -24,7 +24,6 @@ export function FeatureSteps({
   features,
   title,
   autoPlayInterval = 4000,
-  imageHeight = "h-[500px]",
   className,
 }: FeatureStepsProps) {
   const [activeStep, setActiveStep] = useState(0)

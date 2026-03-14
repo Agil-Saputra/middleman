@@ -15,7 +15,7 @@ export async function POST(
         // ── Validation ──────────────────────────────────────────────────────────
         if (!file_url || typeof file_url !== "string" || !file_url.trim()) {
             return NextResponse.json(
-                { error: "Link file wajib diisi" },
+                { error: "Link bukti wajib diisi" },
                 { status: 400 }
             );
         }
@@ -107,7 +107,7 @@ export async function POST(
 
         return NextResponse.json(
             {
-                message: "Aset berhasil dikirim",
+                message: "Bukti berhasil dikirim",
                 transaction: updatedTransaction,
                 delivery_log: deliveryLog,
             },
@@ -116,7 +116,7 @@ export async function POST(
     } catch (error) {
         console.error("POST /api/transactions/[id]/deliver error:", error);
         return NextResponse.json(
-            { error: "Gagal mengirim aset" },
+            { error: "Gagal mengirim bukti" },
             { status: 500 }
         );
     }

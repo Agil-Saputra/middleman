@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, Clock3, Package, Shield } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { STATUS_CONFIG, TransactionStatus } from "@/app/lib/types";
 import UploadDelivery from "@/app/components/UploadDelivery";
 
@@ -88,11 +90,11 @@ function CountdownTimer({ targetDate }: { targetDate: string }) {
     return <span className="font-mono text-sm font-bold text-status-pending">{timeLeft}</span>;
 }
 
-const TIMELINE_STEPS: { status: TransactionStatus; label: string; icon: string }[] = [
-    { status: "PENDING", label: "Menunggu Pembayaran", icon: "⏳" },
-    { status: "SECURED", label: "Dana Diamankan", icon: "🔒" },
-    { status: "DELIVERED", label: "Aset Dikirim", icon: "📦" },
-    { status: "COMPLETED", label: "Selesai", icon: "✅" },
+const TIMELINE_STEPS: { status: TransactionStatus; label: string; icon: LucideIcon }[] = [
+    { status: "PENDING", label: "Menunggu Pembayaran", icon: Clock3 },
+    { status: "SECURED", label: "Dana Diamankan", icon: Shield },
+    { status: "DELIVERED", label: "Aset Dikirim", icon: Package },
+    { status: "COMPLETED", label: "Selesai", icon: CheckCircle2 },
 ];
 
 const STATUS_ORDER: TransactionStatus[] = ["PENDING", "SECURED", "DELIVERED", "COMPLETED"];
@@ -240,11 +242,12 @@ export default function TransactionDetail({ transaction: tx, currentUserId }: Tr
                             {TIMELINE_STEPS.map((step, i) => {
                                 const isActive = i <= currentStepIndex;
                                 const isCurrent = i === currentStepIndex;
+                                const StepIcon = step.icon;
                                 return (
                                     <div key={step.status} className="flex flex-1 items-center">
                                         <div className="flex flex-col items-center gap-1.5">
                                             <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-base transition-all ${isCurrent ? "bg-primary-blue text-white shadow-lg shadow-primary-blue/30 scale-110" : isActive ? "bg-primary-blue/20 text-primary-blue" : "bg-slate-200 text-muted-foreground"}`}>
-                                                {step.icon}
+                                                <StepIcon className="h-5 w-5" strokeWidth={2.2} />
                                             </div>
                                             <span className={`text-[10px] font-medium text-center max-w-[70px] ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                                                 {step.label}
@@ -367,7 +370,7 @@ export default function TransactionDetail({ transaction: tx, currentUserId }: Tr
                         {/* Delivery Logs */}
                         {tx.delivery_logs.length > 0 && (
                             <div className="glass-card p-5 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-                                <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Riwayat Pengiriman</h2>
+                                <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Riwayat Bukti</h2>
                                 <div className="space-y-3">
                                     {tx.delivery_logs.map((log) => (
                                         <div key={log.id} className="rounded-xl border border-card-border bg-white/[0.02] p-4">
@@ -487,7 +490,7 @@ export default function TransactionDetail({ transaction: tx, currentUserId }: Tr
                                         <div className="mb-3 text-3xl">🔒</div>
                                         <h3 className="mb-1 text-sm font-semibold text-foreground">Dana Diamankan</h3>
                                         <p className="text-xs text-muted-foreground">
-                                            Pembayaran Anda telah diterima dan dana diamankan di escrow. Menunggu penjual mengirim aset.
+                                            Pembayaran Anda telah diterima dan dana diamankan di escrow. Menunggu penjual mengirim link bukti video atau foto atau file.
                                         </p>
                                         {tx.deadline_time && (
                                             <div className="mt-3 rounded-lg bg-white/[0.03] px-3 py-2 w-full">
@@ -506,7 +509,7 @@ export default function TransactionDetail({ transaction: tx, currentUserId }: Tr
                                         <div className="flex items-center gap-3 mb-3">
                                             <div>
                                                 <h3 className="text-sm font-semibold text-foreground">Pembeli Sudah Bayar!</h3>
-                                                <p className="text-xs text-muted-foreground">Dana diamankan. Silakan kirim aset Anda.</p>
+                                                <p className="text-xs text-muted-foreground">Dana diamankan. Silakan kirim link bukti video atau foto atau file.</p>
                                             </div>
                                         </div>
                                         {tx.deadline_time && (
@@ -607,9 +610,9 @@ export default function TransactionDetail({ transaction: tx, currentUserId }: Tr
                                 <div className="glass-card p-5 animate-fade-in-up">
                                     <div className="flex flex-col items-center text-center py-2">
                                         <div className="mb-3 text-3xl">📬</div>
-                                        <h3 className="mb-1 text-sm font-semibold text-foreground">Aset Telah Dikirim</h3>
+                                        <h3 className="mb-1 text-sm font-semibold text-foreground">Bukti Telah Dikirim</h3>
                                         <p className="text-xs text-muted-foreground">
-                                            Menunggu pembeli mengkonfirmasi penerimaan aset.
+                                            Menunggu pembeli mengkonfirmasi bukti yang telah dikirim.
                                         </p>
                                         {tx.auto_release_at && (
                                             <div className="mt-3 rounded-lg bg-status-completed-bg/50 px-3 py-2 w-full">

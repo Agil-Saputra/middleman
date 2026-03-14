@@ -41,6 +41,7 @@ export default function SignUpPage() {
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           data: {
             name: name.trim(),
           },
@@ -64,7 +65,7 @@ export default function SignUpPage() {
 
       // If email confirmation is disabled, user is auto-confirmed
       if (data.session) {
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       } else {
         // Email confirmation is enabled

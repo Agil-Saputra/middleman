@@ -116,7 +116,6 @@ export async function POST(req: NextRequest) {
 
             // Try to find the transaction using any of the possible IDs
             let transaction = null;
-            let findError = null;
 
             for (const candidateId of possibleIds) {
                 const { data, error } = await supabase
@@ -129,11 +128,9 @@ export async function POST(req: NextRequest) {
 
                 if (data && !error) {
                     transaction = data;
-                    findError = null;
                     console.log(`[Webhook] Matched transaction ${data.id} using ID: ${candidateId}`);
                     break;
                 }
-                findError = error;
             }
 
             // Fallback: try matching by payment link URL if Mayar includes the link
@@ -148,7 +145,6 @@ export async function POST(req: NextRequest) {
 
                 if (data && !error) {
                     transaction = data;
-                    findError = null;
                     console.log(`[Webhook] Matched transaction ${data.id} using payment link URL`);
 
                     // Persist the webhook's transaction ID for future lookups

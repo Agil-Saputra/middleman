@@ -36,7 +36,20 @@ export default function SignInPage() {
         return;
       }
 
-      router.push("/");
+      let redirectTo = "/dashboard";
+      const redirectRes = await fetch("/api/auth/redirect", {
+        method: "GET",
+        headers: { "Cache-Control": "no-store" },
+      });
+
+      if (redirectRes.ok) {
+        const redirectData = await redirectRes.json();
+        if (typeof redirectData?.redirectTo === "string") {
+          redirectTo = redirectData.redirectTo;
+        }
+      }
+
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");

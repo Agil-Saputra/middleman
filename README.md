@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+![Middleman Logo](public/blue-logo.svg)
 
-## Getting Started
+# Middleman — Aplikasi Rekening Bersama
 
-First, run the development server:
+Middleman adalah aplikasi escrow untuk transaksi digital/jasa yang melibatkan **pembeli** dan **penjual** dalam satu platform.
+Dana pembeli ditahan terlebih dahulu, lalu diteruskan ke penjual saat transaksi selesai dan kedua belah pihak merasa puas.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Fitur Utama
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Autentikasi user (sign up / sign in) via Supabase Auth.
+- Pembuatan transaksi dengan fee platform otomatis (**5%**).
+- Integrasi pembayaran dengan **Mayar** (payment link + webhook + pengecekan manual).
+- Alur status transaksi:
+  - `PENDING` → `SECURED` → `DELIVERED` → `COMPLETED`
+  - Jalur sengketa: `DELIVERED` → `DISPUTED` → `REFUNDED`
+- Upload bukti pengiriman oleh penjual.
+- Konfirmasi selesai / ajukan sengketa oleh pembeli.
+- Auto-release transaksi (`/api/transactions/auto-release`) untuk transaksi `DELIVERED` yang melewati batas waktu lebih dari 3 hari.
+- Wallet internal + withdrawal user.
+- Dashboard admin untuk approval/update status withdrawal + export CSV.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Supabase** (Auth + Database)
+- **Tailwind CSS**
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## Kredensial Demo (User & Admin)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Gunakan kredensial berikut agar reviewer bisa mencoba semua role.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### A. Akun User (Buyer)
 
-## Deploy on Vercel
+- Email: `bukanagel@gmail.com`
+- Password: `123456`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### B. Akun User (Seller)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Email: `seller@test.com`
+- Password: `Middleman123!`
+
+### C. Akun Admin
+
+- Email: `admin@gmail.com`
+- Password: `admin`
+
+## Cara Menggunakan Aplikasi (End-to-End)
+
+### Sebagai Seller
+
+1. Login sebagai `seller@test.com`.
+2. Buka dashboard.
+3. Buat transaksi baru:
+	- Isi judul, deskripsi, harga.
+	- Isi email buyer: `bukanagel@gmail.com`.
+4. Sistem membuat transaksi + payment link Mayar.
+
+### Sebagai Buyer
+
+1. Login sebagai `bukanagel@gmail.com`.
+2. Buka detail transaksi.
+3. Jika pembayaran sudah terdeteksi, status menjadi `SECURED`.
+4. Setelah seller mengirim bukti (`DELIVERED`), buyer bisa:
+	- **Complete** transaksi (dana masuk wallet seller), atau
+	- **Dispute** (dana direfund ke wallet buyer).
+
+### Sebagai Admin
+
+1. Login sebagai `admin@gmail.com`.
+2. Masuk ke halaman `/admin`.
+3. Kelola request withdrawal:
+	- Ubah status (`PENDING`, `PROCESSING`, `COMPLETED`, `REJECTED`)
+	- Isi catatan admin
+	- Export data CSV
+
+## Notes untuk Reviewer
+
+- Jika setelah selesai pembayaran namun status transaksi belum terupdate, gunakan tombol/flow pengecekan manual payment (`check-payment`) di halaman detail transaksi.
+- Untuk simulasi `auto-release`, panggil endpoint:
+

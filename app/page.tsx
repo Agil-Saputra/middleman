@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
@@ -8,26 +8,21 @@ import { Hero } from "@/components/ui/animated-hero";
 import { FeatureSteps } from "@/components/ui/feature-steps";
 import DisplayCards from "@/components/ui/display-cards";
 import Features from "@/components/ui/main-features";
+import { createSupabaseBrowserClient } from "@/app/lib/supabase-browser";
 
 import {
   Shield,
   Eye,
-  ThumbsUp,
   RefreshCcw,
-  ChevronDown,
   Globe,
   Menu,
   X,
   ShieldCheck,
   Lock,
-  Smile,
-  AlertTriangle,
-  ArrowRight,
   ShoppingCart,
   Car,
   Cpu,
   Building2,
-  Star,
   Mail,
   MapPin,
   Handshake,
@@ -44,20 +39,6 @@ const NAV_LINKS = [
   { label: "Cara Kerja", href: "#how-it-works" },
 ];
 
-const CATEGORIES = [
-  "Jual Beli Akun",
-  "Elektronik",
-  "Properti",
-  "Kendaraan",
-  "Biro Jasa",
-];
-
-const TRUST_POINTS = [
-  { icon: ShieldCheck, text: "Transaksi aman dan terjamin" },
-  { icon: Lock, text: "Pengaturan Rekber Tanpa Repot" },
-  { icon: Smile, text: "Kenyamanan dan Kepercayaan" },
-  { icon: AlertTriangle, text: "Mencegah Penipuan" },
-];
 
 const FEATURES = [
   {
@@ -151,10 +132,30 @@ const PRODUCTS = [
 /* ─────────────────── Page ─────────────────── */
 
 export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState<"seller" | "buyer">("buyer");
-  const [category, setCategory] = useState(CATEGORIES[0]);
-  const [catOpen, setCatOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
+  const [authenticatedName, setAuthenticatedName] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const displayName =
+          user.user_metadata?.name || user.email?.split("@")[0] || "User";
+        setAuthenticatedName(displayName);
+      } else {
+        setAuthenticatedName(null);
+      }
+
+      setAuthChecked(true);
+    };
+
+    checkAuth();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-black overflow-x-hidden">
@@ -191,18 +192,39 @@ export default function LandingPage() {
               <Globe className="h-4 w-4" />
               <span>ID</span>
             </button>
-            <Link
-              href="/auth/signin"
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors px-3 py-1.5"
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="text-sm font-semibold bg-primary-blue hover:bg-accent-hover text-white px-4 py-2 rounded-xl transition-colors"
-            >
-              Daftar
-            </Link>
+            {authChecked && authenticatedName ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 rounded-full border border-card-border bg-card px-3 py-1.5 hover:border-primary-blue/30 transition-colors"
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-blue/15 text-[10px] font-bold text-primary-blue">
+                  {authenticatedName
+                    .split(" ")
+                    .map((name: string) => name[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </div>
+                <span className="text-xs font-medium text-foreground">
+                  {authenticatedName}
+                </span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth/signin"
+                  className="text-sm font-medium text-foreground hover:text-accent transition-colors px-3 py-1.5"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="text-sm font-semibold bg-primary-blue hover:bg-accent-hover text-white px-4 py-2 rounded-xl transition-colors"
+                >
+                  Daftar
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -232,20 +254,42 @@ export default function LandingPage() {
                   {l.label}
                 </a>
               ))}
-              <div className="pt-3 border-t border-card-border flex gap-3">
-                <Link
-                  href="/auth/signin"
-                  className="flex-1 text-center text-sm font-medium border border-card-border rounded-xl py-2 hover:bg-card transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="flex-1 text-center text-sm font-semibold bg-primary-blue hover:bg-accent-hover text-white rounded-xl py-2 transition-colors"
-                >
-                  Daftar
-                </Link>
-              </div>
+              {authChecked && authenticatedName ? (
+                <div className="pt-3 border-t border-card-border">
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-card-border bg-card px-3 py-2.5 hover:border-primary-blue/30 transition-colors"
+                    onClick={() => setMobileNav(false)}
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-blue/15 text-[10px] font-bold text-primary-blue">
+                      {authenticatedName
+                        .split(" ")
+                        .map((name: string) => name[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </div>
+                    <span className="text-sm font-medium text-foreground">
+                      {authenticatedName}
+                    </span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-card-border flex gap-3">
+                  <Link
+                    href="/auth/signin"
+                    className="flex-1 text-center text-sm font-medium border border-card-border rounded-xl py-2 hover:bg-card transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="flex-1 text-center text-sm font-semibold bg-primary-blue hover:bg-accent-hover text-white rounded-xl py-2 transition-colors"
+                  >
+                    Daftar
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}

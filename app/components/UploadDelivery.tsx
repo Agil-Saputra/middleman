@@ -41,7 +41,7 @@ export default function UploadDelivery({
 
                 if (!res.ok) {
                     const data = await res.json();
-                    throw new Error(data.error || "Gagal mengirim aset");
+                    throw new Error(data.error || "Gagal mengirim bukti");
                 }
 
                 setStatus("success");
@@ -79,10 +79,10 @@ export default function UploadDelivery({
                         </svg>
                     </div>
                     <h3 className="mb-1 text-base font-semibold text-foreground">
-                        Aset Berhasil Dikirim!
+                        Bukti Berhasil Dikirim!
                     </h3>
                     <p className="text-sm text-muted-foreground max-w-xs">
-                        Pembeli akan menerima notifikasi. Status transaksi telah diubah
+                        Pembeli akan menerima notifikasi. Status transaksi telah diperbarui
                         menjadi <span className="font-semibold text-status-delivered">DELIVERED</span>.
                     </p>
                 </div>
@@ -110,11 +110,11 @@ export default function UploadDelivery({
                         </svg>
                     </div>
                     <h3 className="text-base font-semibold text-foreground">
-                        Kirim Aset Digital
+                        Kirim Bukti 
                     </h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                    Pembayaran sudah dikonfirmasi. Kirimkan file hasil kerja ke pembeli.
+                    Pembayaran sudah dikonfirmasi. Kirimkan link bukti video atau foto atau file ke pembeli.
                 </p>
             </div>
 
@@ -125,19 +125,19 @@ export default function UploadDelivery({
                         htmlFor="delivery-file-url"
                         className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
-                        Link File (Google Drive / Dropbox / dll)
+                        Link Bukti (Video / Foto / File)
                     </label>
                     <input
                         id="delivery-file-url"
                         type="url"
                         value={fileUrl}
                         onChange={(e) => setFileUrl(e.target.value)}
-                        placeholder="https://drive.google.com/file/d/..."
+                        placeholder="https://drive.google.com/... atau https://youtube.com/..."
                         className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                         required
                     />
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                        Pastikan link bisa diakses oleh pembeli
+                        Pastikan link video/foto/file bisa diakses oleh pembeli
                     </p>
                 </div>
 
@@ -147,14 +147,14 @@ export default function UploadDelivery({
                         htmlFor="delivery-text-proof"
                         className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
-                        Catatan Pengiriman{" "}
+                        Catatan Tambahan{" "}
                         <span className="normal-case text-muted-foreground/60">(opsional)</span>
                     </label>
                     <textarea
                         id="delivery-text-proof"
                         value={textProof}
                         onChange={(e) => setTextProof(e.target.value)}
-                        placeholder="Deskripsi file, instruksi penggunaan, catatan tambahan..."
+                        placeholder="Keterangan bukti, detail pengiriman, atau catatan tambahan..."
                         rows={3}
                         className="w-full resize-none rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                     />
@@ -166,8 +166,8 @@ export default function UploadDelivery({
                         htmlFor="delivery-screen-record"
                         className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
-                        Link Screen Recording{" "}
-                        <span className="normal-case text-muted-foreground/60">(sangat disarankan)</span>
+                        Link Bukti Tambahan{" "}
+                        <span className="normal-case text-muted-foreground/60">(opsional)</span>
                     </label>
                     <input
                         id="delivery-screen-record"
@@ -178,7 +178,7 @@ export default function UploadDelivery({
                         className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm text-foreground placeholder:text-black/50 outline-none transition-all duration-200 focus:border-input-focus focus:ring-2 focus:ring-input-focus/20"
                     />
                     <p className="mt-1 text-[11px] text-status-pending">
-                        ⚠ Rekam proses penyerahan aset sebagai bukti jika terjadi sengketa
+                        ⚠ Sertakan bukti tambahan untuk memperkuat validasi jika terjadi sengketa
                     </p>
                 </div>
 
@@ -218,7 +218,7 @@ export default function UploadDelivery({
                             Mengirim...
                         </span>
                     ) : (
-                        "Kirim Aset"
+                        "Kirim Bukti"
                     )}
                 </button>
 
